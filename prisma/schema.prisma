@@ -39,7 +39,7 @@ model usage {
 enum role {
   admin
   manager
-  customera
+  customer
   provider
 }
 
