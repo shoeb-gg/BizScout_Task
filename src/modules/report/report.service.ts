@@ -1,5 +1,4 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { JobState, Queue } from 'bullmq';
 import { UsageService } from '../usage/usage.service';
@@ -9,7 +8,6 @@ import { ResponseDto } from 'src/common/dto/response.dto';
 export class ReportService {
   constructor(
     @InjectQueue('reports') private reportsQueue: Queue,
-    private readonly prisma: PrismaService,
     private readonly usageService: UsageService,
   ) {}
 
