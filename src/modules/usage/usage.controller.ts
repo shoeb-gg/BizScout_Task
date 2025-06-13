@@ -1,34 +1,34 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { UsageService } from './usage.service';
 import { CreateUsageDto } from './dto/create-usage.dto';
 import { UpdateUsageDto } from './dto/update-usage.dto';
+import { ResponseDto } from 'src/common/dto/response.dto';
+import { Usage } from './entities/usage.entity';
+import { GetUsageDto } from './dto/get-usage.dto';
 
 @Controller('usage')
 export class UsageController {
   constructor(private readonly usageService: UsageService) {}
 
   @Post()
-  create(@Body() createUsageDto: CreateUsageDto) {
-    return this.usageService.create(createUsageDto);
+  async create(
+    @Body() createUsageDto: CreateUsageDto,
+  ): Promise<ResponseDto<Usage>> {
+    return await this.usageService.create(createUsageDto);
   }
 
-  @Get()
-  findAll() {
-    return this.usageService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usageService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsageDto: UpdateUsageDto) {
-    return this.usageService.update(+id, updateUsageDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usageService.remove(+id);
+  @Get(':user_id')
+  async findOne(
+    @Param('user_id') user_id: bigint,
+  ): Promise<ResponseDto<GetUsageDto | null>> {
+    return await this.usageService.findOne(user_id);
   }
 }
