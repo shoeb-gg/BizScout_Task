@@ -8,6 +8,7 @@ import { AuthService } from './core/auth/auth.service';
 import { AuthController } from './core/auth/auth.controller';
 import { ReportModule } from './modules/report/report.module';
 import { BullModule } from '@nestjs/bullmq';
+import { HealthModule } from './core/health/health.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { BullModule } from '@nestjs/bullmq';
       },
       defaultJobOptions: { attempts: 2 },
     }),
+    HealthModule,
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, PrismaService, UserService, AuthService],
