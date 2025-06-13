@@ -1,8 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { JobState, Queue } from 'bullmq';
 import { UsageService } from '../usage/usage.service';
+import { ResponseDto } from 'src/common/dto/response.dto';
 
 @Injectable()
 export class ReportService {
@@ -16,7 +17,7 @@ export class ReportService {
     try {
       const user_usage = await this.usageService.findOne(user_id);
 
-      const job = await this.reportsQueue.add(' generateReport', {
+      const job = await this.reportsQueue.add('generateReport', {
         user_usage,
         priority: 0,
       });
@@ -31,6 +32,28 @@ export class ReportService {
       console.error(error);
       throw new HttpException(
         'Server Error while Registering Usage!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getJobStatus(
+    job_id: string,
+  ): Promise<ResponseDto<JobState | 'unknown'>> {
+    try {
+      const jobStatus: JobState | 'unknown' =
+        await this.reportsQueue.getJobState(job_id);
+
+      return {
+        data: jobStatus,
+        success: true,
+        message: `The current status of the job with jobId: ${job_id} is ${jobStatus}`,
+        status: HttpStatus.OK,
+      };
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        'Server Error while getting job status!',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
