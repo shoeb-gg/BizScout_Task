@@ -331,9 +331,10 @@ describe('Billing Calculation', () => {
 ## 🏃‍♂️ Getting Started
 
 1. **Clone the repository**
-2. **Run with Docker** (see setup section above)
-3. **Import Postman collection** for API testing
-4. **Check health endpoint**: `GET /api/v1/health`
+2. **add the .env file into root folder. Contact project owner for the file**
+3. **Run with Docker** (see setup section above)
+4. **Import Postman collection** for API testing
+5. **Check health endpoint**: `GET /api/v1/health`
 
 ---
 
