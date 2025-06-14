@@ -1,98 +1,305 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 BizScout Billing Tracker
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> A **scalable** and **robust** billing system with async job processing for usage tracking and report generation
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## 🛠️ Local Development Setup
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+### Quick Start with Docker 🐳
 
 ```bash
-$ npm install
+# Build the container
+docker build -t billing-tracker .
+
+# Run the application
+docker run -p 6009:6009 billing-tracker
 ```
 
-## Compile and run the project
+🎉 **That's it!** Your application will be running on `http://localhost:6009`
 
-```bash
-# development
-$ npm run start
+---
 
-# watch mode
-$ npm run start:dev
+## 🏗️ Architecture Overview
 
-# production mode
-$ npm run start:prod
+### System Design Philosophy
+
+Our billing tracker follows a **microservice-ready** architecture with clear separation of concerns:
+
+```
+┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐
+│   NestJS API    │───▶│  PostgreSQL  │    │   Redis Store   │
+│   (REST Layer)  │    │  (Supabase)  │    │  (BullMQ Jobs)  │
+└─────────────────┘    └──────────────┘    └─────────────────┘
+         │                                           │
+         ▼                                           ▼
+┌─────────────────┐                        ┌─────────────────┐
+│ Usage Tracking  │                        │  Job Processing │
+│   & Billing     │                        │   (2 Workers)   │
+└─────────────────┘                        └─────────────────┘
+                                                    │
+                                                    ▼
+                                          ┌─────────────────┐
+                                          │  PDF Generator  │
+                                          │  (Puppeteer)    │
+                                          └─────────────────┘
 ```
 
-## Run tests
+### 🎯 Core Components
 
-```bash
-# unit tests
-$ npm run test
+- **🌐 NestJS Backend**: Scalable server framework with SOLID principles
+- **🗄️ Prisma ORM**: Type-safe database operations
+- **🐘 Supabase**: PostgreSQL database with real-time capabilities
+- **⚡ BullMQ**: Redis-based job queue for async processing
+- **🔧 Redis**: Key-value store for job metadata
+- **📄 Puppeteer**: PDF generation for usage reports
+- **🧪 Jest**: Industry-standard unit testing
 
-# e2e tests
-$ npm run test:e2e
+---
 
-# test coverage
-$ npm run test:cov
+## 💡 Technology Choices & Reasoning
+
+| Technology            | Why We Chose It                                         |
+| --------------------- | ------------------------------------------------------- |
+| **NestJS**            | 🎯 Mature, scalable framework enabling SOLID principles |
+| **Prisma + Supabase** | 🚀 Simple, performant relational database operations    |
+| **BullMQ**            | ⚡ Best-in-class job queue with Redis backing           |
+| **Puppeteer**         | 📊 Mature, reliable PDF generation                      |
+| **Jest**              | ✅ Industry standard for unit testing                   |
+| **Class Validator**   | 🛡️ Robust input validation                              |
+
+---
+
+## 📊 Database Schema
+
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    USER {
+        bigint id PK
+        datetime created_at
+        datetime updated_at
+        string email
+        string password
+        string name
+        role user_role
+    }
+
+    USAGE {
+        bigint id PK
+        datetime created_at
+        int quantity
+        event_type event
+        bigint user_id FK
+    }
+
+    USER ||--o{ USAGE : "has many"
 ```
 
-## Deployment
+### 📋 Schema Details
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+**Users Table:**
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- Primary entity for billing
+- Role-based access (admin, manager, customer, provider)
+- Timestamped for audit trails
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+**Usage Table:**
+
+- Tracks API calls, VM uptime, CPU time, data storage
+- Linked to users for billing calculations
+- Indexed for fast queries
+
+---
+
+## 🔄 Data Flow Architecture
+
+```mermaid
+graph TD
+    A[Client Request] --> B[NestJS Controller]
+    B --> C[Usage Service]
+    C --> D[Prisma ORM]
+    D --> E[Supabase DB]
+
+    F[Report Request] --> G[Report Controller]
+    G --> H[BullMQ Producer]
+    H --> I[Redis Queue]
+    I --> J[BullMQ Consumer]
+    J --> K[PDF Generator]
+    K --> L[Local File Storage]
+
+    style A fill:#e1f5fe
+    style F fill:#e8f5e8
+    style I fill:#fff3e0
+    style L fill:#fce4ec
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 📚 API Documentation
 
-Check out a few resources that may come in handy when working with NestJS:
+### 🔗 Available Endpoints
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+| Method | Endpoint                        | Description           |
+| ------ | ------------------------------- | --------------------- |
+| `POST` | `/api/v1/usage/`                | Create usage record   |
+| `GET`  | `/api/v1/usage/:id`             | Get usage by ID       |
+| `POST` | `/api/v1/reports/:userId`       | Generate usage report |
+| `GET`  | `/api/v1/reports/status/:jobId` | Check job status      |
+| `GET`  | `/api/v1/health`                | Health check          |
 
-## Support
+### 📋 Example Requests
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+#### Create Usage Record
 
-## Stay in touch
+```json
+POST /api/v1/usage/
+{
+    "quantity": 500000,
+    "event": "api_calls",
+    "user_id": 1
+}
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+#### Generate Report
 
-## License
+```json
+POST /api/v1/reports/1
+// Returns: { "jobId": "23", "status": "queued" }
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+#### Check Job Status
+
+```json
+GET /api/v1/reports/status/23
+// Returns: { "status": "completed", "fileUrl": "/reports/user-1-report.pdf" }
+```
+
+**📎 Complete Postman Collection:** [Available in repository]
+
+---
+
+## ⚡ Async Workflow Design
+
+### 🔄 Job Processing Pipeline
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API
+    participant Database
+    participant BullMQ
+    participant Worker
+    participant FileSystem
+
+    Client->>API: POST /reports/:userId
+    API->>Database: Fetch user usage data
+    Database-->>API: Return usage records
+    API->>BullMQ: Queue report generation job
+    BullMQ-->>API: Return job ID
+    API-->>Client: Return job ID & status
+
+    BullMQ->>Worker: Process job (2 concurrent)
+    Worker->>FileSystem: Generate PDF report
+    Worker->>BullMQ: Mark job as completed
+
+    Client->>API: GET /status/:jobId
+    API->>BullMQ: Check job status
+    BullMQ-->>API: Return status
+    API-->>Client: Return job status & file URL
+```
+
+### 🎯 Job Types
+
+1. **📊 Report Generation Jobs**
+
+   - Fetch monthly usage data
+   - Calculate billing amounts
+   - Generate PDF reports
+   - Store files locally
+
+2. **⚙️ Processing Configuration**
+   - **Concurrency**: 2 workers
+   - **Queue Storage**: Redis
+   - **Job Persistence**: Metadata stored in Redis
+
+---
+
+## ⚖️ Assumptions & Trade-offs
+
+### 🔐 Security Considerations
+
+- ⚠️ **No comprehensive authentication** implemented
+- 🔄 **Trade-off**: Rapid development vs production security
+- 💡 **Mitigation**: Planned for future iterations
+
+### 🌐 Infrastructure Limitations
+
+- 📊 **Free tier resources** (Render, Supabase)
+- ⚡ **Trade-off**: Cost efficiency vs production scalability
+- 🎯 **Impact**: Limited concurrent connections and storage
+
+### 📁 File Storage
+
+- 💾 **Local file storage** for PDF reports
+- 🔄 **Trade-off**: Simplicity vs distributed storage
+- 📈 **Scaling concern**: File management across instances
+
+---
+
+## 🚀 Future Improvements
+
+### 🔒 Security Enhancements
+
+- [ ] JWT-based authentication
+- [ ] Role-based access control (RBAC)
+- [ ] API rate limiting
+- [ ] Input sanitization improvements
+
+### 🏗️ Architecture Evolution
+
+- [ ] **Microservices decomposition**
+  - User service
+  - Billing service
+  - Report service
+- [ ] **Event-driven architecture**
+  - Event sourcing for usage tracking
+  - CQRS for read/write optimization
+
+### 📊 Scaling Strategies
+
+- [ ] **Horizontal scaling**
+  - Multiple worker instances
+  - Load balancer integration
+- [ ] **Database optimization**
+  - Read replicas
+  - Connection pooling
+  - Query optimization
+
+### 📈 Feature Roadmap
+
+- [ ] **Enhanced reporting**
+  - Real-time dashboards
+  - Custom date ranges
+  - Export formats (Excel, CSV)
+- [ ] **Advanced billing**
+  - Multiple pricing tiers
+  - Usage quotas and alerts
+  - Automated invoicing
+
+---
+
+## 🧪 Testing Strategy
+
+### 🎯 Core Component Focus: **Billing Calculation Logic**
+
+Our testing strategy prioritizes the most critical component - ensuring users are billed correctly.
+
+#### 📊 Tiered Billing System Tests
+
+```typescript
+// Example: Testing tiered API call pricing
+describe('Billing Calculation', () => {
+  it('should apply correct tier pr
+```
