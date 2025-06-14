@@ -33,7 +33,9 @@ export class UsageService {
     }
   }
 
-  async findOne(user_id: bigint): Promise<ResponseDto<GetUsageDto | null>> {
+  async getMonthlyUsage(
+    user_id: bigint,
+  ): Promise<ResponseDto<GetUsageDto | null>> {
     try {
       const now = new Date();
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

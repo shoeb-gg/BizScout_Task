@@ -20,6 +20,6 @@ export class UsageController {
   async findOne(
     @Param('user_id') user_id: bigint,
   ): Promise<ResponseDto<GetUsageDto | null>> {
-    return await this.usageService.findOne(user_id);
+    return await this.usageService.getMonthlyUsage(user_id);
   }
 }

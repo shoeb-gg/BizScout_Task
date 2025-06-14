@@ -13,11 +13,11 @@ export class ReportService {
 
   async generate(user_id: bigint) {
     try {
-      const user_usage = await this.usageService.findOne(user_id);
+      const user_usage = await this.usageService.getMonthlyUsage(user_id);
 
       const job = await this.reportsQueue.add('generateReport', {
-        user_usage,
-        priority: 0,
+        data: { ...user_usage.data, user_id },
+        opts: { priority: 1 },
       });
 
       return {
