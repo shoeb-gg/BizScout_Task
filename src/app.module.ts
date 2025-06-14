@@ -9,22 +9,31 @@ import { AuthController } from './core/auth/auth.controller';
 import { ReportModule } from './modules/report/report.module';
 import { BullModule } from '@nestjs/bullmq';
 import { HealthModule } from './core/health/health.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
     UsageModule,
     ReportModule,
-    BullModule.forRoot({
-      connection: {
-        host: 'singapore-keyvalue.render.com',
-        port: 6379,
-        username: 'red-d15ube6mcj7s73dqf9qg',
-        password: '3AYrCyDGUjv8zLnuGWVAaW1KApTcgrNN',
-        tls: {},
-      },
-      defaultJobOptions: { attempts: 2 },
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+          username: configService.get<string>('REDIS_USERNAME'),
+          password: configService.get<string>('REDIS_PASSWORD'),
+          tls: {},
+        },
+        defaultJobOptions: { attempts: 2 },
+      }),
     }),
     HealthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
   ],
   controllers: [AppController, AuthController],
   providers: [AppService, PrismaService, UserService, AuthService],
