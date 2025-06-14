@@ -301,5 +301,52 @@ Our testing strategy prioritizes the most critical component - ensuring users ar
 ```typescript
 // Example: Testing tiered API call pricing
 describe('Billing Calculation', () => {
-  it('should apply correct tier pr
+  it('should apply correct tier pricing for API calls', () => {
+    // Tier 1: 0-10k calls = $0.01 per call
+    // Tier 2: 10k-100k calls = $0.008 per call
+    // Tier 3: 100k+ calls = $0.005 per call
+
+    expect(calculateCost(5000, 'api_calls')).toBe(50.0);
+    expect(calculateCost(50000, 'api_calls')).toBe(420.0);
+    expect(calculateCost(200000, 'api_calls')).toBe(1320.0);
+  });
+});
 ```
+
+#### ✅ Test Categories
+
+- **Unit Tests**: Billing calculation accuracy
+- **Integration Tests**: End-to-end billing workflow
+- **Edge Cases**: Boundary conditions and error handling
+
+#### 🔧 CI/CD Pipeline
+
+- **GitHub Actions**: Automated testing on every push
+- **Linting**: ESLint + Prettier for code quality
+- **Coverage**: Jest coverage reports
+- **Docker**: Containerized testing environment
+
+---
+
+## 🏃‍♂️ Getting Started
+
+1. **Clone the repository**
+2. **Run with Docker** (see setup section above)
+3. **Import Postman collection** for API testing
+4. **Check health endpoint**: `GET /api/v1/health`
+
+---
+
+## 📞 Support
+
+For questions or issues, please check the documentation or create an issue in the repository.
+
+---
+
+<div align="center">
+
+**Built with ❤️ using NestJS, Prisma, and BullMQ**
+
+_Scalable • Reliable • Developer-Friendly_
+
+</div>
