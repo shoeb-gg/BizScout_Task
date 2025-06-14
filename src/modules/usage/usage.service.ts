@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUsageDto } from './dto/create-usage.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service'; // Changed to relative path
 import { Usage } from './entities/usage.entity';
 import { ResponseDto } from 'src/common/dto/response.dto';
 import {
