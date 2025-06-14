@@ -3,7 +3,10 @@ import { CreateUsageDto } from './dto/create-usage.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Usage } from './entities/usage.entity';
 import { ResponseDto } from 'src/common/dto/response.dto';
-import { BILLING_RATES } from 'src/constants/api-billing.constant';
+import {
+  BILLING_RATES,
+  BILLING_TIERS,
+} from 'src/constants/api-billing.constant';
 import { GetUsageDto } from './dto/get-usage.dto';
 
 @Injectable()
@@ -52,7 +55,7 @@ export class UsageService {
       const usageReport: GetUsageDto = {
         quantity: usages._sum.quantity ? usages._sum.quantity : 0,
         totalCost: usages._sum.quantity
-          ? usages._sum.quantity * BILLING_RATES.API_CALL
+          ? this.calculateTieredCost(usages._sum.quantity)
           : 0,
         currency: BILLING_RATES.CURRENCY,
       };
@@ -79,4 +82,22 @@ export class UsageService {
       JSON.stringify(obj, (_, v) => (typeof v === 'bigint' ? v.toString() : v)),
     );
   };
+
+  calculateTieredCost(totalCalls: number): number {
+    let cost = 0;
+    let remaining = totalCalls;
+
+    for (const tier of BILLING_TIERS) {
+      if (remaining <= 0) break;
+
+      const tierCalls = tier.max
+        ? Math.min(remaining, tier.max - tier.min + 1)
+        : remaining;
+
+      cost += tierCalls * tier.rate;
+      remaining -= tierCalls;
+    }
+
+    return cost;
+  }
 }
